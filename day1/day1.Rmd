@@ -117,7 +117,7 @@ where $\mathbf{y}$ is the vector of observed phenotypes, $\mathbf{g}$ is the vec
 
 Example:
 
-| Plant ID   | y           | g  |   e  |
+| Animal ID   | y           | g  |   e  |
 | ------------- |:-------------:| -----:|------|
 | 1      | 10 | ? |  ?     |
 | 2      |  7     |   ? |  ?    |
@@ -137,7 +137,7 @@ where $\mathbf{y}$ is the vector of observed phenotypes, $\mathbf{g}$ is the vec
 
 Example:
 
-| Plant ID    | y           | g  |   e  |
+| Animal ID    | y           | g  |   e  |
 | ------------- |:-------------:| -----:|------|
 | 1      | 10 | 5 |  5     |
 | 2      |  7     |   6 |  1    |
