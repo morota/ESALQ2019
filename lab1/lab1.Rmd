@@ -27,7 +27,7 @@ opts_knit$set(width=75)
 ```
 
 ## Background
-This is the day 1 computer lab session for quantitative genetic analysis. You can find the course website [here](https://wheatme.wixsite.com/wheatme/workshop-2019). The goal of this exercise is to set up mixed model equations (MME) and obtain solutions for best linear unbiased estimator (BLUE) and best linear unbiased prediction (BLUP).
+This is the day 1 computer lab session for quantitative genetic analysis. The goal of this exercise is to set up mixed model equations (MME) and obtain solutions for best linear unbiased estimator (BLUE) and best linear unbiased prediction (BLUP).
 
 
 ## Data
