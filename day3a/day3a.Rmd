@@ -178,7 +178,7 @@ Recall that
 BLUP(\hat{\mathbf{g}}) &= [\mathbf{I} +  (\mathbf{WW'})^{-1}  \frac{\sigma^2_{\epsilon}}{\sigma^2_{a}} ]^{-1}  \mathbf{y}, 
 \end{align}
 
-Replacing $\sigma^2_{\beta}$ we get 
+Replacing $\sigma^2_{a}$ we get 
 \begin{align}
 BLUP(\hat{\mathbf{g}}) &= \left [\mathbf{I} +    (\mathbf{WW'})^{-1} \frac{\sigma^2_{\epsilon}}{ \frac{ \sigma^2_{g}}{2 \sum_j p_j(1-p_j)}} \right ]^{-1}  \mathbf{y}  \notag \\ 
 &= \left [\mathbf{I} +    \mathbf{G}^{-1} \frac{\sigma^2_{\epsilon}}{ \sigma^2_g} \right ]^{-1}  \mathbf{y}  
