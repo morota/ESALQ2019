@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Bayesian confirmatory factor analysis and Bayesian network to characterize high-dimensional phenotypic data</title>
+    <meta charset="utf-8">
+    <meta name="author" content="Gota Morota  http://morotalab.org/" />
+    <link href="libs/remark-css/default.css" rel="stylesheet" />
+    <link href="libs/remark-css/default-fonts.css" rel="stylesheet" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# Bayesian confirmatory factor analysis and Bayesian network to characterize high-dimensional phenotypic data
+## Quantitative Genetics and Genomics Workshop <span class="citation">@ESALQ</span>
+### Gota Morota <br /><a href="http://morotalab.org/" class="uri">http://morotalab.org/</a> <br />
+### 2019/5/24
+
+---
+
+
+
+
+
+
+# NSF funded project - wrchr.org 
+![](hk1.png)
+
+---
+# NSF funded project - wrchr.org 
+![](hk2.png)
+
+---
+# NSF funded project - wrchr.org 
+&lt;img src="hk4.png" height="506px" width="750px"/&gt;
+
+---
+# How to handle a large number of phenotypes?
+More and more phenotypes are being generated across time and space
+&lt;img src="bigPhe.png" height="130px" width="600px"/&gt;
+
+Challenges:
+- high dimensional phenotypes
+- diverse phenotypes
+- how to make sense of these data and interpret
+-  multi-trait linear mixed model is computationally challenging
+
+Objective:
+- use Bayesian confirmatory factor analysis and Bayesian
+- network to characterize a wide spectrum of rice phenotypes
+
+---
+# Bayesian confirmatory factor analysis
+Assume observed phenotypes are derived from  underlying latent variables
+
+`\begin{align*}
+    \mathbf{T} =  \mathbf{\Lambda} \mathbf{F} + \mathbf{s}
+\end{align*}`
+  
+- `\(\mathbf{T}\)` is the `\(t \times n\)` matrix of observed phenotypes (413 accessions)
+
+- `\(\mathbf{\Lambda}\)` is the `\(t \times q\)` factor loading matrix
+
+- `\(\mathbf{F}\)` is the `\(q \times n\)` latent variables matrix
+
+- `\(\mathbf{s}\)` is the `\(t \times n\)` matrix of specific effects.
+
+`\begin{align*}
+    var\mathbf{(T)} &amp;= \mathbf{\Lambda}\mathbf{\Phi}\mathbf{\Lambda}' + \mathbf{\Psi},
+\end{align*}`
+
+
+- `\(\mathbf{\Phi}\)` is the variance of latent variables
+
+- `\(\mathbf{\Psi}\)` is the variance of specific effects
+
+
+---
+# Define 6 latent variables from 48 phenotypes
+
+
+1. Grain Morphology (Grm, 11)
+    - Seed length (Sl), Seed width (Sw), Seed volume (Sv), etc
+2. Morphology (Mrp, 14)
+    - Flag leaf length (Fll), Flag leaf width (Flw), etc
+3. Flowering Time (Flt, 7)
+    - Flowering time in Arkansas (Fla), Flowering time in Aberdeen (Flb), etc}
+4. Ionic components of salt stress (Iss, 6) 
+    - Na shoot (Nas), K shoot salt (Kss), etc
+5. Yield (Yid, 5)
+    - Panicle number per plant (Pnu),   Panicle length (Pal), etc
+6. Morphological salt response (Msr, 5)  
+    - Shoot BM ratio (Sbr), Root BM ratio (Rbr), etc
+
+---
+# Study the genetics of each latent variable
+![](BCFA.pdf)
+
+---
+# Multivariate analysis
+
+1. Bayesian genomic best linear unbiased prediction
+    - separate genetic effects from noise (44K SNPs)
+    - `\(\mathbf{F} = \boldsymbol{\mu} + \mathbf{Xb} + \mathbf{Zu} + \boldsymbol{\epsilon}\)`
+
+2. Bayesian network
+    - interrelationship among latent variables
+    - genetic selection for breeding requires causal assumptions
+
+&lt;img src="BCFA2.png" height="256px" width="400px"/&gt;
+
+
+
+---
+# Constraint-based learning
+![](Fig3.pdf)
+
+
+
+---
+# Standardized factor loadings
+&lt;img src="load2.png" height="506px" width="500px"/&gt;
+
+---
+# Standardized factor loadings
+&lt;img src="load3.png" height="466px" width="500px"/&gt;
+
+
+---
+# Genetic correlations among latent variable
+![](Cor_plot_for_presentation.pdf)
+
+---
+# Hill Climbing algorithm
+![](BN_HC.pdf)
+
+
+
+---
+# Tabu algorithm
+![](BN_TABU.pdf)
+
+
+---
+# Max-Min Hill Climbing algorithm
+![](BN_MMHC.pdf)
+
+
+---
+# General 2-Phase Restricted Maximization algorithm
+&lt;img src="BN_RSMAX2.pdf" height="460px" width="650px"/&gt;
+
+
+---
+# Consensus Bayesian network
+![](BN_consensus.pdf)
+
+---
+# Paper - 10.1534/g3.119.400154
+&lt;img src="G32018.png" height="460px" width="650px"/&gt;
+
+
+
+
+---
+# FA vs. PCA
+
+- What is the main difference between principal component analysis (PCA) and factor analysis (FA)? 
+
+- Confirmatory factor analysis (CFA) vs. Explanatory factor analysis (EFA)
+
+
+
+---
+# Summary
+
+- Bayesian cofirmatory factor analysis allows to work at the
+level of latent variables
+
+- Bayesian network can be applied to predict the potential influence of external interventions or selection associated with target traits
+
+- Provide greater insights than pairwise-association measures of multiple phenotypes
+
+- It is possible to dissect genetic signals from high-dimensional phenotypes if we focus on underlying patterns in big data
+    </textarea>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function() {
+  var d = document, s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})();</script>
+
+<script>
+(function() {
+  var i, text, code, codes = document.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+})();
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
