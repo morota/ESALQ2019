@@ -1,0 +1,163 @@
+---
+title: "Gaussian Bayesian Network"
+author: "Haipeng Yu"
+date: "2019/5/24"
+output: 
+    prettydoc::html_pretty:
+    theme: cayman
+    highlight: github
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+```
+
+# Load R packages. 
+
+```{r}
+library(bnlearn)
+library(ggplot2)
+library(gaston)
+library(Rgraphviz)
+library(BGLR)
+library(MTM)
+```
+
+# Data Import
+
+```{r}
+# Set working directory to Data
+rm(list = ls())
+setwd('Data/')
+
+# Import Phenotype
+pheno <- read.csv("salt_phenotypes.csv", row.names = 1)
+dim(pheno) # 385   7
+pheno <- na.omit(pheno) # remove NAs
+dim(pheno) # 366   7
+
+# Import genotype
+geno <- read.bed.matrix("sativas413")
+dim(geno) # 413 36901
+# str(geno)
+## Subset accesions with both genotype and phenotype records.  
+geno@ped$id <- paste0("NSFTV_", geno@ped$id)
+geno <- geno[geno@ped$id %in% row.names(pheno), ]
+dim(geno) # 363 36901
+pheno <- pheno[match(geno@ped$id, row.names(pheno)), ]
+dim(pheno) # 363   7
+## Check ids in genotype and phenotype are identical
+table(geno@ped$id == rownames(pheno))
+```
+
+# Construct GRM
+
+```{r}
+# Quality control of genotype file with MAF & Callrate
+geno <- select.snps(geno, c(maf > 0.05 & callrate > 0.9))
+dim(geno) # 363 29499
+
+# GRM matrix
+grm <- GRM(geno)
+dim(grm) # 363 363
+
+```
+
+# Fit MTM Model 
+
+```{r, results = 'hide'}
+# Define a MTM_func with MTM Package
+MTM_func <- function( Y, G, nTrait, nIter, burnIn, thin, prefix) {
+  library(MTM)
+  set.seed(007) # reproductive results
+  MTM ( Y = Y, K = list ( list ( K = G, COV = list ( type = 'UN', df0 = nTrait,
+        S0 = diag (nTrait) ) ) ), resCov = list ( type = 'UN', S0 = diag (nTrait), df0 = nTrait),
+        nIter = nIter, burnIn = burnIn, thin = thin, saveAt = prefix)
+  }
+
+Y <- scale(pheno, center = TRUE, scale = TRUE)
+G <- grm
+nTrait <- ncol(Y)
+
+MTM_fit <- MTM_func( Y = Y, G = G, nTrait = nTrait, nIter = 1200, burnIn = 200,
+                     thin = 5, prefix  = 'MTM_fit')
+
+## Check gibbs samples
+list.files(pattern = 'MTM_fit')
+
+## Retrieve estimates
+str(MTM_fit)
+BV <- MTM_fit$K[[1]]$U # estimated breeding values
+dim(BV) # 363   7
+colnames(BV) <- colnames(pheno)
+```
+
+# Remove the dependence in EBV with Cholesky Decomposition
+We can decompose $\mathbf{G}$ into its Cholesky factors $\mathbf{G} = \mathbf{L} \mathbf{L'}$. Here, $\mathbf{L}$ is an $n \times n$ lower triangular matrix. For a single trait we can remove the dependancy from our breeding values $\mathbf{u}$ by computing the adjusted breeding values $\mathbf{u^*}$ by $\mathbf{u^*} = \mathbf{L^{-1}} \mathbf{u}$. However, since we have multiple traits $\mathbf{u}$ is $(n \times t) \times 1$, where $t$ is the number of traits. Thus, we will construct a $(n \times t) \times (n \times t)$ matrix $\mathbf{M^{-1}} = \mathbf{I_{(n \times t) \times (n \times t)}} \otimes \mathbf{L^{-1}}$. Then we have $\mathbf{u^*} = \mathbf{M^{-1}} \mathbf{u}$
+
+```{r}
+Linv <- solve(t(chol(grm)))
+Minv <- kronecker(diag(7), Linv)
+BV_adj <- matrix(Minv %*% c(BV), nrow = 363, ncol = 7)
+colnames(BV_adj) <- names(pheno)
+BV_adj <- as.data.frame(BV_adj)
+```
+
+# Structure Learning (Gaussian-BN)
+```{r}
+#-------------------------
+# Predefined function
+#-------------------------
+## Histogram with density curve for normality check
+hist_graph <- function (df_all, trait, labels) {
+  library (ggplot2)
+  ggplot (df_all, aes(trait)) + 
+    geom_histogram (aes(y = ..density..), colour = "black", fill = "white", bins = 10) +
+    geom_density (alpha = .2, fill = "#FF6666") +
+    labs (x = labels) }
+
+## Check strength and direction in BN
+check_boot <- function(boot, Strength_Thres, Direction_Thres) {
+  boot[(boot$strength>= Strength_Thres) & (boot$direction> Direction_Thres),]
+}
+
+# Normality check
+hist_graph (BV_adj, BV_adj[, 1], colnames(BV_adj)[1])
+
+#------------------------------------------
+# Structure leaning : Method 1 and Method 2
+#------------------------------------------
+# Method 1 : Subjective prior + Data
+## Score-baesd algorithm: Tabu with Data
+tabu_simple <- tabu(BV_adj) 
+graphviz.plot(tabu_simple, main = "Tabu", shape = "ellipse", layout = "dot")
+## Incorporate subjective prior
+blklist <- data.frame(from = c("K.Shoot.Salt", "K.Shoot.Control" ), 
+                      to = c("K.Shoot.Control", "K.Shoot.Salt"))
+## Subjective prior + Data
+tabu_blk <- tabu(BV_adj, blacklist = blklist) 
+graphviz.plot(tabu_blk, main = "Tabu_blk", shape = "ellipse", layout = "dot")
+
+#----------------------------------------------------------------------------
+# Method 2 : Only with Data 
+## Score-baesd algorithm: Tabu
+tabu_simple <- tabu(BV_adj) 
+graphviz.plot(tabu_simple, main = "Tabu", shape = "ellipse", layout = "dot")
+## Model Averaging with bootstrap resampling to account for uncertainty
+set.seed(007)
+boot_tabu <- boot.strength (BV_adj, algorithm = "tabu", R = 500)
+## Check strength and direction
+check_boot(boot_tabu, 0.8, 0.5)
+## Average bootstrap resampling
+ave_model_tabu <- averaged.network(boot_tabu, threshold = 0.8)
+graphviz.plot(ave_model_tabu, shape = 'ellipse')
+```
+
+
+
+
+
+
+
+
+
